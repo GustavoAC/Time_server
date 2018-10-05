@@ -6,21 +6,36 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
 
 public class CalendarImplementation extends UnicastRemoteObject implements ICalendar {
 	private static final long serialVersionUID = 1L;
-
+	private static List<String> validTimezones = Arrays.asList(TimeZone.getAvailableIDs());
+	
 	protected CalendarImplementation() throws RemoteException {
 	}
 
 	@Override
 	public String getFormattedDate(String format) throws RemoteException {
-		Date data = new Date();
+		return getFormattedDateAt(format, TimeZone.getDefault().getID());
+	}
+	
+	@Override
+	public String getFormattedDateAt(String format, String timezone) throws RemoteException {
+		if (!isTimezoneValid(timezone)) {
+			return "Invalid Timezone";
+		}
 		
-		String formattedData;
+		Date date = new Date();
+		SimpleDateFormat sdf;
+		
 		try {
-			formattedData = new SimpleDateFormat(format).format(data);
+			sdf = new SimpleDateFormat(format);
+			sdf.setTimeZone(TimeZone.getTimeZone(timezone));
+			return sdf.format(date);
 		} catch (IllegalArgumentException e) {
 			StringBuilder sb = new StringBuilder("Invalid date format.\n");
 			sb.append("\ty   = year   (yy or yyyy)\n")
@@ -35,10 +50,12 @@ public class CalendarImplementation extends UnicastRemoteObject implements ICale
 			  .append("\tZ   = time zone, time offset (e.g. -0800)\n")
 			  .append("Example: yyyy-MM-dd");
 			
-			formattedData = sb.toString();
+			return sb.toString();
 		}
-		
-		return formattedData;
+	}
+	
+	public boolean isTimezoneValid(String timezone) {
+		return validTimezones.contains(timezone);
 	}
 	
 	public static void main(String[] args) throws RemoteException, MalformedURLException {
