@@ -1,4 +1,4 @@
-package server;
+package rmi.server;
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;
@@ -18,12 +18,10 @@ public class CalendarImplementation extends UnicastRemoteObject implements ICale
 	protected CalendarImplementation() throws RemoteException {
 	}
 
-	@Override
 	public String getFormattedDate(String format) throws RemoteException {
 		return getFormattedDateAt(format, TimeZone.getDefault().getID());
 	}
 	
-	@Override
 	public String getFormattedDateAt(String format, String timezone) throws RemoteException {
 		if (!isTimezoneValid(timezone)) {
 			return "Invalid Timezone";

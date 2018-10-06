@@ -1,4 +1,4 @@
-package client;
+package rmi.client;
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;
@@ -7,7 +7,7 @@ import java.rmi.RemoteException;
 import java.util.Scanner;
 
 import exceptions.DateServerException;
-import server.ICalendar;
+import rmi.server.ICalendar;
 
 public class CalendarClient {
 	private ICalendar calendar;
