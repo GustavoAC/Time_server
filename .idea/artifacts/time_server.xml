@@ -1,6 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="exploded-war" name="time_server">
-    <output-path>$PROJECT_DIR$/classes/artifacts/time_server</output-path>
-    <root id="root" />
-  </artifact>
-</component>
