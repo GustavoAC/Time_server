@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import model.FormatDTO;
 import model.FormatLocaleDTO;
 import model.TimeParsingException;
+import model.TimezoneDTO;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -24,7 +25,7 @@ public class Time {
     private ObjectMapper mapper = new ObjectMapper();
 
     @POST
-    @Path("/getFormattedDate")
+    @Path("/formatted_date")
     public String getFormattedDate(String json) {
         try {
             FormatDTO format = mapper.readValue(json, FormatDTO.class);
@@ -38,7 +39,7 @@ public class Time {
     }
 
     @POST
-    @Path("/getFormattedDateAt")
+    @Path("/timezone_formatted_date")
     public String getFormattedDateAt(String json) {
         try {
             FormatLocaleDTO formatLocaleDTO = mapper.readValue(json, FormatLocaleDTO.class);
@@ -48,6 +49,19 @@ public class Time {
             return "{ \"error\": \"Error on the parsing of the input\"}";
         } catch (TimeParsingException e) {
             return "{ \"error\": \"" + e.getMessage() + "\" }";
+        }
+    }
+
+    @GET
+    @Path("/timezones")
+    public String getTimezones() {
+        try {
+            TimezoneDTO timezoneDTO = new TimezoneDTO();
+            timezoneDTO.setTimezones(timeService.getValidTimezones());
+            return mapper.writeValueAsString(timezoneDTO);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return "{ \"error\": \"Error on processing the request\"}";
         }
     }
 }

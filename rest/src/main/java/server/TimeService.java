@@ -51,6 +51,10 @@ public class TimeService {
         }
     }
 
+    public List<String> getValidTimezones() {
+        return validTimezones;
+    }
+
     private boolean isTimezoneValid(String timezone) {
         return validTimezones.contains(timezone);
     }
