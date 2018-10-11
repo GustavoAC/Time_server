@@ -1,13 +1,7 @@
 package server;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import model.FormatDTO;
-import model.FormatLocaleDTO;
-import model.TimeParsingException;
-import model.TimezoneDTO;
+import model.*;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -15,7 +9,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.io.IOException;
+import javax.ws.rs.core.Response;
 
 @Path("/time")
 @Produces(MediaType.APPLICATION_JSON)
@@ -26,42 +20,33 @@ public class Time {
 
     @POST
     @Path("/formatted_date")
-    public String getFormattedDate(String json) {
+    public Response getFormattedDate(FormatDTO formatDTO) {
         try {
-            FormatDTO format = mapper.readValue(json, FormatDTO.class);
-
-            return "{ \"time\": \"" + timeService.getFormattedDate(format.getFormat()) + "\" }";
+            TimeResponseDTO timeResponseDTO = new TimeResponseDTO();
+            timeResponseDTO.setTime(timeService.getFormattedDate(formatDTO.getFormat()));
+            return Response.ok(timeResponseDTO).build();
         } catch (TimeParsingException e) {
-            return "{ \"error\": \"" + e.getMessage() + "\" }";
-        } catch (IOException e) {
-            return "{ \"error\": \"Error on the parsing of the input\"}";
+            return Response.serverError().entity(new ErrorDTO(e.getMessage())).build();
         }
     }
 
     @POST
     @Path("/timezone_formatted_date")
-    public String getFormattedDateAt(String json) {
+    public Response getFormattedDateAt(FormatLocaleDTO formatLocaleDTO) {
         try {
-            FormatLocaleDTO formatLocaleDTO = mapper.readValue(json, FormatLocaleDTO.class);
-
-            return "{ \"time\": \"" + timeService.getFormattedDateAt(formatLocaleDTO.getFormat(), formatLocaleDTO.getTimezone()) + "\" }";
-        } catch (IOException e) {
-            return "{ \"error\": \"Error on the parsing of the input\"}";
+            TimeResponseDTO timeResponseDTO = new TimeResponseDTO();
+            timeResponseDTO.setTime(timeService.getFormattedDateAt(formatLocaleDTO.getFormat(), formatLocaleDTO.getTimezone()));
+            return Response.ok(timeResponseDTO).build();
         } catch (TimeParsingException e) {
-            return "{ \"error\": \"" + e.getMessage() + "\" }";
+            return Response.serverError().entity(new ErrorDTO(e.getMessage())).build();
         }
     }
 
     @GET
     @Path("/timezones")
-    public String getTimezones() {
-        try {
-            TimezoneDTO timezoneDTO = new TimezoneDTO();
-            timezoneDTO.setTimezones(timeService.getValidTimezones());
-            return mapper.writeValueAsString(timezoneDTO);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return "{ \"error\": \"Error on processing the request\"}";
-        }
+    public Response getTimezones() {
+        TimezoneDTO timezoneDTO = new TimezoneDTO();
+        timezoneDTO.setTimezones(timeService.getValidTimezones());
+        return Response.ok(timezoneDTO).build();
     }
 }

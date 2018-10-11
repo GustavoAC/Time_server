@@ -1,25 +1,21 @@
 package client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.deploy.net.HttpResponse;
 import model.TimezoneDTO;
-import org.omg.CORBA.NameValuePair;
-import sun.net.www.http.HttpClient;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class CalendarRestClient {
 	public static void main(String[] args) {
-		URL formatUrl = null;
-		URL formatTimezoneUrl = null;
-		URL getTimezones = null;
+		URL formatUrl;
+		URL formatTimezoneUrl;
+		URL getTimezones;
 		try {
 			formatUrl = new URL("http://localhost:8080/rest_glassfish_war_exploded/time/formatted_date");
 			formatTimezoneUrl = new URL("http://localhost:8080/rest_glassfish_war_exploded/time/timezone_formatted_date");
@@ -86,7 +82,7 @@ public class CalendarRestClient {
 			if (body != null) {
 				con.setDoOutput(true);
 				OutputStream os = http.getOutputStream();
-				OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
+				OutputStreamWriter osw = new OutputStreamWriter(os, StandardCharsets.UTF_8);
 				osw.write(body);
 				osw.flush();
 				osw.close();
@@ -94,10 +90,23 @@ public class CalendarRestClient {
 
 			http.connect();
 
-			BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
-			return br.readLine();
+			BufferedReader br;
+
+			if (http.getResponseCode() == 200) {
+				br = new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));
+			} else {{
+				br = new BufferedReader(new InputStreamReader(http.getErrorStream(), StandardCharsets.UTF_8));
+			}}
+
+			String temp, res = "";
+			while ((temp = br.readLine()) != null) {
+				res += temp + "\n";
+			}
+			return res;
+
 
 		} catch (Exception e) {
+			e.printStackTrace();
 			return "Ocorreu um erro na tentativa de conexão";
 		}
 	}
